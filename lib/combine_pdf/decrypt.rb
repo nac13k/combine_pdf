@@ -35,6 +35,12 @@ module CombinePDF
       change_references_to_actual_values @encryption_dictionary
     end
 
+    def patch_auth_event(cfilter)
+      raise_encrypted_error unless cfilter
+
+      cfilter[:AuthEvent] = :DocOpen if cfilter[:AuthEvent].nil?
+    end
+
     # call this to start the decryption.
     def decrypt
       raise_encrypted_error @encryption_dictionary unless @encryption_dictionary[:Filter] == :Standard
@@ -52,8 +58,8 @@ module CombinePDF
         # - AND :CFM == :V2 (use algorithm 1)
         raise_encrypted_error unless (@encryption_dictionary[:StmF] == @encryption_dictionary[:StrF])
 
-        cfilter = actual_object(@encryption_dictionary[:CF])[@encryption_dictionary[:StrF]]
-        raise_encrypted_error unless cfilter
+        cfilter = patch_auth_event(actual_object(@encryption_dictionary[:CF])[@encryption_dictionary[:StrF]])
+
         raise_encrypted_error unless (cfilter[:AuthEvent] == :DocOpen)
         if (cfilter[:CFM] == :V2)
           _perform_decrypt_proc_ @objects, method(:decrypt_RC4)
