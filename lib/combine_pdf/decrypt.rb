@@ -39,6 +39,8 @@ module CombinePDF
       raise_encrypted_error unless cfilter
 
       cfilter[:AuthEvent] = :DocOpen if cfilter[:AuthEvent].nil?
+
+      cfilter
     end
 
     # call this to start the decryption.
